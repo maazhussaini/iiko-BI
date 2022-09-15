@@ -1,0 +1,78 @@
+{
+    "olapType": "SALES",
+    "categoryFields": [],
+    "groupFields": [
+	"UniqOrderId.Id",
+	"Department",
+	"Conception",
+	"OpenDate.Typed",
+	"OrderNum",
+	"TableNum",
+	"DeletedWithWriteoff",
+	"RemovalType",
+	"DeletionComment",
+	"DishId",
+	"DishCode",
+	"DishName",
+	"DishFullName",
+	"DishCategory.Accounting",
+	"DishCategory",
+	"DishGroup",
+	"DishGroup.TopParent",
+	"DishGroup.SecondParent",
+	"DishGroup.ThirdParent",
+	"Cooking.ServeNumber",
+	"WaiterName",
+	"DishServicePrintTime",
+	"Comment",
+	"SoldWithDish",
+	"OrderDiscount.Type",
+	"OrderIncrease.Type",
+	"ItemSaleEventDiscountType",
+	"Delivery.CookingFinishTime"
+    ],
+    "stackByDataFields": false,
+    "dataFields": [
+        "DishAmountInt",
+	"DishSumInt.averagePriceWithVAT",
+	"DishDiscountSumInt.averagePriceWithVAT",
+	"DishSumInt",
+	"DiscountSum",
+	"IncreaseSum",
+	"DishDiscountSumInt",
+	"VAT.Sum",
+	"DishDiscountSumInt.withoutVAT",
+	"Cooking.CookingDuration.Avg",
+	"Cooking.Cooking1Duration.Avg",
+	"Cooking.Cooking2Duration.Avg",
+	"Cooking.Cooking3Duration.Avg",
+	"Cooking.Cooking4Duration.Avg"
+    ],
+    "calculatedFields": [
+    ],
+    "filters": [
+        {
+            "field": "OpenDate.Typed",
+            "filterType": "date_range",
+            "dateFrom": "2022-08-09T00:00:00",
+            "dateTo": "2022-08-09T00:00:00",
+            "valueMin": null,
+            "valueMax": null,
+            "valueList": [],
+            "includeLeft": true,
+            "includeRight": false,
+            "inclusiveList": true
+        },
+	{
+            "field": "UniqOrderId.Id",
+            "filterType": "value_list",
+            "valueList": ["81dd877e-422a-4ee4-b047-0bd628d71ada","82685255-d045-456e-93b4-cc3b040e60a5","8bf9c523-7403-4f6d-a329-99a36f3c910c"],
+            "includeLeft": true,
+            "includeRight": false,
+            "inclusiveList": true
+        }
+
+    ],
+    "includeVoidTransactions": false,
+    "includeNonBusinessPaymentTypes": true
+}

@@ -1,0 +1,32 @@
+Conception,CreditUser,Delivery.IsDelivery,Delivery.SourceKey,Department,DishDiscountSumInt,ExternalNumber,OpenDate.Typed,OrderNum,OrderType,PayTypes,UniqOrderId.Id
+YoSushi,,DELIVERY_ORDER,TALABAT,Studio City Kitchen,128.0,,2022-06-20,3837,DELIVERACT Collection,Aggregator Payment,8405bc37-273d-48b3-8bda-8cd508142a1b
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Studio City Kitchen,107.0,,2022-06-20,3844,DELIVERACT Collection,Aggregator Payment,84ea8a5a-7c2e-4258-84e8-18811c2e4725
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Studio City Kitchen,67.5,,2022-06-20,3848,DELIVERACT Collection,Aggregator Payment,891bedb9-17a3-4773-9b74-6b379bfc66c8
+YoSushi,,DELIVERY_ORDER,ZOMATO,Studio City Kitchen,40.0,,2022-06-20,3839,DELIVERACT Collection,Aggregator Payment,8fae67a2-0520-4a05-8908-c417525b3289
+YoSushi,,DELIVERY_ORDER,CloudCallCenter,Studio City Kitchen,84.62,,2022-06-20,3856,ENTERTAINER,Aggregator Payment,a11abd92-b223-4d42-9bf0-e810a1ec47f2
+YoSushi,,DELIVERY_ORDER,CloudCallCenter,Studio City Kitchen,110.2,,2022-06-20,3843,INSTASHOP,Aggregator Payment,a2e91ed1-9e9b-4451-a563-3176bb14826e
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Studio City Kitchen,98.0,,2022-06-20,3857,DELIVERACT Collection,Aggregator Payment,a54b31da-5e49-405f-a915-39982ac6ec28
+YoSushi,,DELIVERY_ORDER,TALABAT,Studio City Kitchen,39.6,,2022-06-20,3846,DELIVERACT Collection,Aggregator Payment,be745f78-48c2-41c6-8a9e-75d88cb70eae
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Studio City Kitchen,46.0,,2022-06-20,3858,DELIVERACT Collection,Aggregator Payment,c4e7b3c5-86d6-4b7d-9a4f-95ac2216aed9
+YoSushi,,DELIVERY_ORDER,TALABAT,Studio City Kitchen,214.25,,2022-06-20,3851,DELIVERACT Collection,Aggregator Payment,c56146b3-9bdc-4b9d-be5f-2608c0302cae
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Studio City Kitchen,36.0,,2022-06-20,3835,DELIVERACT Collection,Aggregator Payment,c6f5bfc5-737e-46f3-8abb-bc9eb0475880
+YoSushi,,DELIVERY_ORDER,TALABAT,Studio City Kitchen,91.0,,2022-06-20,3840,DELIVERACT Collection,Aggregator Payment,df79de88-75d7-4a60-b7e2-0b9a059a63d6
+YoSushi,,DELIVERY_ORDER,TALABAT,Studio City Kitchen,47.2,,2022-06-20,3834,DELIVERACT Collection,Aggregator Payment,e093651f-713d-451e-b9e9-7690542e56dc
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Studio City Kitchen,148.5,,2022-06-20,3850,DELIVERACT Collection,Aggregator Payment,e5c6b844-14b9-44e5-bede-0d85d4cb10c5
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Studio City Kitchen,109.0,,2022-06-20,3853,DELIVERACT Collection,Aggregator Payment,f0040bfa-2948-4626-9cf7-36ee9b7bc80f
+YoSushi,,DELIVERY_ORDER,ZOMATO,Studio City Kitchen,183.4,,2022-06-20,3838,DELIVERACT Collection,Aggregator Payment,f5d0ae30-ee43-46db-bd6e-7f7c28e9a1b6
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Studio City Kitchen,72.0,,2022-06-20,3859,DELIVERACT Collection,Aggregator Payment,f7926da8-e2ab-4a2e-b7d7-3dfb1bbf32bb
+YoSushi,,DELIVERY_ORDER,TALABAT,Studio City Kitchen,63.2,,2022-06-20,3854,DELIVERACT Collection,Aggregator Payment,0277e566-e437-44d3-94f1-f29ebcdbfebd
+YoSushi,,DELIVERY_ORDER,TALABAT,Studio City Kitchen,133.5,,2022-06-20,3842,DELIVERACT Collection,Aggregator Payment,03266e6f-d8d6-4b14-aff1-055640a34a6a
+YoSushi,,DELIVERY_ORDER,CloudCallCenter,Studio City Kitchen,78.6,,2022-06-20,3832,INSTASHOP,Aggregator Payment,05cbc03c-9a65-4507-9317-6a777d68bec4
+YoSushi,,DELIVERY_ORDER,ZOMATO,Studio City Kitchen,95.9,,2022-06-20,3861,DELIVERACT Collection,Aggregator Payment,0833e342-0eec-48c1-ae48-52e338b666b4
+YoSushi,,DELIVERY_ORDER,ZOMATO,Studio City Kitchen,79.1,,2022-06-20,3860,DELIVERACT Collection,Aggregator Payment,0f62b2d4-80e6-45f7-96ca-b10e14d09cbd
+YoSushi,,DELIVERY_ORDER,ZOMATO,Studio City Kitchen,53.6,,2022-06-20,3845,ZOMATO,Aggregator Payment,13f3ad4f-b326-4710-84a0-3d8a83ef483e
+YoSushi,,DELIVERY_ORDER,TALABAT,Studio City Kitchen,55.2,,2022-06-20,3862,DELIVERACT Collection,Aggregator Payment,17c4d957-2a52-403a-9954-5389495fdf22
+YoSushi,,DELIVERY_ORDER,ZOMATO,Studio City Kitchen,75.6,,2022-06-20,3852,DELIVERACT Collection,Aggregator Payment,1d5dd5fd-b2c9-4a3b-8e40-79f1b8c1b020
+YoSushi,,DELIVERY_ORDER,TALABAT,Studio City Kitchen,112.5,,2022-06-20,3841,DELIVERACT Collection,Aggregator Payment,27b23661-1619-4b7a-83bb-1ddec01db2e0
+YoSushi,,DELIVERY_ORDER,TALABAT,Studio City Kitchen,43.2,,2022-06-20,3831,DELIVERACT Collection,Aggregator Payment,2833d759-6bf6-4e08-90b6-d341352051eb
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Studio City Kitchen,103.5,,2022-06-20,3833,DELIVERACT Collection,Aggregator Payment,391be157-6ac7-4aaf-a643-0f17cd5f1e0a
+YoSushi,,DELIVERY_ORDER,TALABAT,Studio City Kitchen,78.8,,2022-06-20,3836,DELIVERACT Collection,Aggregator Payment,3c553ea8-f09a-4f57-8a88-81fc10e6e694
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Studio City Kitchen,50.0,,2022-06-20,3847,DELIVERACT Collection,Aggregator Payment,43b65c68-26bd-4a74-8ccd-110f4b214f2b
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Studio City Kitchen,90.0,,2022-06-20,3849,DELIVERACT Collection,Aggregator Payment,6f79f6b3-d896-4808-8386-7ee0d5c7dede

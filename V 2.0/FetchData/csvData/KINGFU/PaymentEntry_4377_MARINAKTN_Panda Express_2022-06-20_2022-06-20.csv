@@ -1,0 +1,22 @@
+Conception,CreditUser,Delivery.IsDelivery,Delivery.SourceKey,Department,DishDiscountSumInt,ExternalNumber,OpenDate.Typed,OrderNum,OrderType,PayTypes,UniqOrderId.Id
+YoSushi,,DELIVERY_ORDER,TALABAT,Marina Kitchen,31.2,,2022-06-20,1322,DELIVERACT Collection,Aggregator Payment,80c796fd-255f-44e0-a814-01a811912b0f
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Marina Kitchen,88.5,,2022-06-20,1333,DELIVERACT Collection,Aggregator Payment,9b770ee1-dbe9-43ee-9e9f-c9b9f2025ff5
+YoSushi,,DELIVERY_ORDER,TALABAT,Marina Kitchen,95.0,,2022-06-20,1341,DELIVERACT Collection,Aggregator Payment,b1a91693-f2fd-4d87-bb45-af9a8e241c9a
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Marina Kitchen,162.0,,2022-06-20,1331,DELIVERACT Collection,Aggregator Payment,bf4b478c-ac0d-4bd2-8922-ab601b95ec82
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Marina Kitchen,138.0,,2022-06-20,1324,DELIVERACT Collection,Aggregator Payment,c426a1e3-7c19-4d41-b11f-51efebb0df8f
+YoSushi,,DELIVERY_ORDER,TALABAT,Marina Kitchen,146.0,,2022-06-20,1334,DELIVERACT Collection,Aggregator Payment,c92e406c-c175-4651-88c9-d3a56f2eba4f
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Marina Kitchen,73.25,,2022-06-20,1335,DELIVERACT Collection,Aggregator Payment,caf150dd-3a73-4095-afe8-e074d73a6a8f
+YoSushi,,DELIVERY_ORDER,TALABAT,Marina Kitchen,60.8,,2022-06-20,1323,DELIVERACT Collection,Aggregator Payment,ce06685f-6eec-4abd-a789-7d6574a0c449
+YoSushi,,DELIVERY_ORDER,CloudCallCenter,Marina Kitchen,96.25,,2022-06-20,1340,ENTERTAINER,Aggregator Payment,ce71f47c-64f7-477e-94bf-55be12a78af0
+YoSushi,,DELIVERY_ORDER,TALABAT,Marina Kitchen,43.2,,2022-06-20,1329,DELIVERACT Collection,Aggregator Payment,d399d535-76af-474a-9b5a-2a8f57717ae4
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Marina Kitchen,425.8,,2022-06-20,1337,DELIVERACT Collection,Aggregator Payment,e140da42-4e17-4a0b-a6fb-d7347afb1031
+YoSushi,,DELIVERY_ORDER,TALABAT,Marina Kitchen,30.8,,2022-06-20,1332,DELIVERACT Collection,Aggregator Payment,e2e4d7cf-3b6f-4073-b13b-9b71884df91c
+YoSushi,,DELIVERY_ORDER,TALABAT,Marina Kitchen,18.0,,2022-06-20,1327,DELIVERACT Collection,Aggregator Payment,062a450e-4948-4c80-9c10-3c6494c365e2
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Marina Kitchen,143.0,,2022-06-20,1328,DELIVEROO,Aggregator Payment,0b22b379-44b5-4a26-a364-4a49718d7406
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Marina Kitchen,152.5,,2022-06-20,1339,DELIVERACT Collection,Aggregator Payment,228086eb-442c-4810-9e64-22c8ef426721
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Marina Kitchen,101.5,,2022-06-20,1330,DELIVERACT Collection,Aggregator Payment,38468bee-26f1-401c-a98a-54d20f3cb23c
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Marina Kitchen,86.5,,2022-06-20,1326,DELIVERACT Collection,Aggregator Payment,3e8444a2-82dc-4dfe-b934-6f3f458651bd
+YoSushi,,DELIVERY_ORDER,ZOMATO,Marina Kitchen,83.0,,2022-06-20,1336,DELIVERACT Collection,Aggregator Payment,57513ff0-b978-44b6-b6c6-ca1c1a5f878f
+YoSushi,,DELIVERY_ORDER,ZOMATO,Marina Kitchen,84.5,,2022-06-20,1342,DELIVERACT Collection,Aggregator Payment,6db439fe-a974-4947-a533-df3864cfca91
+YoSushi,,DELIVERY_ORDER,CloudCallCenter,Marina Kitchen,145.0,,2022-06-20,1325,ENTERTAINER,Aggregator Payment,73efe272-f061-4763-bb34-80c563852cc6
+YoSushi,,DELIVERY_ORDER,DELIVEROO,Marina Kitchen,74.5,,2022-06-20,1338,DELIVERACT Collection,Aggregator Payment,7b87258b-50fc-48cb-9cdc-bb1d303ea3ef

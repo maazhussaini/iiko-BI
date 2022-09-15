@@ -1,0 +1,16 @@
+{
+    "SourceFolder": "Requirements/Data/",
+    "DumpFolder": {
+        "main": "FetchData/",
+        "csv": "csvData/",
+        "json": "jsonData/"
+    },
+    "CustomDate": {
+        "status": true,
+        "DateFrom": "2022-09-01T00:00:00",
+        "DateTo": "2022-09-14T00:00:00"
+    },
+    "SleepTime": 60,
+    "attempCounts": 4,
+    "maxDays": 10
+}

@@ -1,0 +1,48 @@
+{
+    "olapType": "SALES",
+    "categoryFields": [],
+    "groupFields": [
+	"UniqOrderId.Id",
+	"OpenDate.Typed",
+"OrderNum",
+"PayTypes",
+"TableNum",
+"SessionNum",
+"PayTypes.Combo",
+"CardNumber",
+"Currencies.Currency",
+"NonCashPaymentType",
+"CreditUser",
+"Currencies.CurrencyRate",
+"AuthUser",
+"AuthUser.Id",
+"Cashier",
+"Cashier.Id"
+    ],
+    "stackByDataFields": false,
+    "dataFields": [
+        "DishDiscountSumInt",
+"VAT.Sum",
+"DishDiscountSumInt.withoutVAT",
+"PayTypes.VoucherNum"
+    ],
+    "calculatedFields": [
+    ],
+    "filters": [
+        {
+            "field": "OpenDate.Typed",
+            "filterType": "date_range",
+            "dateFrom": "2022-08-09T00:00:00",
+            "dateTo": "2022-08-09T00:00:00",
+            "valueMin": null,
+            "valueMax": null,
+            "valueList": [],
+            "includeLeft": true,
+            "includeRight": false,
+            "inclusiveList": true
+        }
+
+    ],
+    "includeVoidTransactions": false,
+    "includeNonBusinessPaymentTypes": true
+}
