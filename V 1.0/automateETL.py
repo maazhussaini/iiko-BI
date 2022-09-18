@@ -26,10 +26,12 @@ RawHeader
 #       description="DatabaseConnection.",
 #       tags=["GENERAL", "DatabaseConnection"])
 
+count = 0
+
 
 def DatabaseConnection():
-    conn = sql.connect(host="SERVER_NAME",
-                            user="admin", password="password", database="database")
+    conn = sql.connect(host="rawiikodata.cpi0e90jeqda.us-east-2.rds.amazonaws.com",
+                            user="admin", password="MySql12$34#", database="rawDataTest")
 
     return conn
 
@@ -272,11 +274,12 @@ class RawHeader:
             logging.error(
                 'olap_ExportPayment - Error - ' + str(datetime.now().today()) + ' - ' + str(err))
 
-    @task(name="FetchStatus",
-          description="RawHeader FetchStatus.",
-          tags=["RawHeader", "FetchStatus"])
-    def RawHeader_FetchStatus(token, dataId):
-
+    # @task(name="FetchStatus",
+    #       description="RawHeader FetchStatus.",
+    #       tags=["RawHeader", "FetchStatus"],
+    #       retries=3, retry_delay_seconds=60)
+    def RawHeader_FetchStatus(self, token, dataId):
+        global count
         try:
             url = "https://yo-sushi-gourmet-gulf-co.iikoweb.co.uk/api/olap/fetch-status/" + dataId
 
@@ -287,7 +290,19 @@ class RawHeader:
             }
             response = requests.request(
                 "GET", url, headers=headers, data=payload)
-            return json.loads(response.text)
+            response = json.loads(response.text)
+            print(response, dataId)
+            if response['data'] == 'SUCCESS':
+                return response
+            else:
+                del response
+                time.sleep(30)
+
+                if count == 4:
+                    return {"data": "Fail"}
+
+                count += 1
+                return self.RawHeader_FetchStatus(token, dataId)
 
         except Exception as err:
             logging.error(
@@ -320,12 +335,13 @@ class RawHeader:
                 "POST", url, headers=headers, data=payload)
 
             fetchData = json.loads(response.text)
+            # print("fetchData: ", fetchData)
             if fetchData['error'] == False:
                 # StoreID_StoreCode_DateFrom_DateTo
 
                 fetchData_df = pd.DataFrame(
                     fetchData['result']['rawData'])
-                print(fetchData_df)
+
                 if not fetchData_df.empty:
 
                     return fetchData_df
@@ -335,88 +351,99 @@ class RawHeader:
             else:
                 fetchData_df = pd.DataFrame()
                 return fetchData_df
+        else:
+            fetchData_df = pd.DataFrame()
+            return fetchData_df
 
     @ task(name="transformData",
            description="RawHeader transformData.",
            tags=["RawHeader", "transformData"])
-    def RawHeader_transformData(rawHeader_df):
-        rawHeader_df.rename(
-            columns={
-                'UniqOrderId.Id': 'uniqueOrderId',
-                'Department': 'store',
-                'Conception': 'conception',
-                'OpenDate.Typed': 'accountingDay',
-                'OrderNum': 'receiptNo',
-                'TableNum': 'tableNo',
-                'SessionNum': 'shiftNo',
-                'OrderDeleted': 'orderDeleted',
-                'Delivery.IsDelivery': 'delivery',
-                'Delivery.ServiceType': 'deliveryType',
-                'RestaurantSection': 'section',
-                'Delivery.SourceKey': 'deliverySource',
-                'OrderType': 'orderType',
-                'ExternalNumber': 'externalOrderNo',
-                'Delivery.CustomerPhone': 'customerPhoneNumber',
-                'Delivery.CustomerName': 'customerFullName',
-                'Delivery.DeliveryComment': 'deliveryComment',
-                'OrderWaiter.Name': 'waiterForTheOrder',
-                'OpenTime': 'openingTime',
-                'Delivery.PrintTime': 'deliveryPrintTime',
-                'Delivery.ExpectedTime': 'plannedDeliveryTime',
-                'Delivery.SendTime': 'deliveryDispatchTime',
-                'Delivery.ActualTime': 'actualDeliveryTime',
-                'Delivery.CloseTime': 'deliveryClosingTime',
-                'PrechequeTime': 'guestBillTime',
-                'Delivery.BillTime': 'deliveryInvoicePrintTime',
-                'CloseTime': 'closingTime',
-                'Delivery.CancelCause': 'deliveryCancellationReason',
-                'Delivery.CancelComment': 'deliveryCancellationComment',
-                'PriceCategory': 'customerPriceCategory',
-                'DishSumInt': 'GrossSalesBD',
-                'DiscountSum': 'discountAmount',
-                'IncreaseSum': 'surchargeAmount',
-                'DishDiscountSumInt': 'grossSalesAD',
-                'VAT.Sum': 'VATByBillAmount',
-                'DishDiscountSumInt.withoutVAT': 'NetSalesAD',
-                'GuestNum': 'numberOfGuests',
-                'DishAmountInt': 'numberOfIitems',
-                'ItemSaleEventDiscountType.DiscountAmount': 'numberOfDiscountedItems',
-                'ItemSaleEventDiscountType.ComboAmount': 'numberOfComboDiscounts',
-                'DishDiscountSumInt.averageByGuest': 'averageRevenuePerGuest',
-                'DishServicePrintTime.Max': 'lastServPrintTime'
-            }, inplace=True)
+    def RawHeader_transformData(rawHeader_df, StoreId):
+        if not rawHeader_df.empty:
+            rawHeader_df.rename(
+                columns={
+                    'UniqOrderId.Id': 'uniqueOrderId',
+                    'Department': 'store',
+                    'Conception': 'conception',
+                    'OpenDate.Typed': 'accountingDay',
+                    'OrderNum': 'receiptNo',
+                    'TableNum': 'tableNo',
+                    'SessionNum': 'shiftNo',
+                    'OrderDeleted': 'orderDeleted',
+                    'Delivery.IsDelivery': 'delivery',
+                    'Delivery.ServiceType': 'deliveryType',
+                    'RestaurantSection': 'section',
+                    'Delivery.SourceKey': 'deliverySource',
+                    'OrderType': 'orderType',
+                    'ExternalNumber': 'externalOrderNo',
+                    'Delivery.CustomerPhone': 'customerPhoneNumber',
+                    'Delivery.CustomerName': 'customerFullName',
+                    'Delivery.DeliveryComment': 'deliveryComment',
+                    'OrderWaiter.Name': 'waiterForTheOrder',
+                    'OpenTime': 'openingTime',
+                    'Delivery.PrintTime': 'deliveryPrintTime',
+                    'Delivery.ExpectedTime': 'plannedDeliveryTime',
+                    'Delivery.SendTime': 'deliveryDispatchTime',
+                    'Delivery.ActualTime': 'actualDeliveryTime',
+                    'Delivery.CloseTime': 'deliveryClosingTime',
+                    'PrechequeTime': 'guestBillTime',
+                    'Delivery.BillTime': 'deliveryInvoicePrintTime',
+                    'CloseTime': 'closingTime',
+                    'Delivery.CancelCause': 'deliveryCancellationReason',
+                    'Delivery.CancelComment': 'deliveryCancellationComment',
+                    'PriceCategory': 'customerPriceCategory',
+                    'DishSumInt': 'GrossSalesBD',
+                    'DiscountSum': 'discountAmount',
+                    'IncreaseSum': 'surchargeAmount',
+                    'DishDiscountSumInt': 'grossSalesAD',
+                    'VAT.Sum': 'VATByBillAmount',
+                    'DishDiscountSumInt.withoutVAT': 'NetSalesAD',
+                    'GuestNum': 'numberOfGuests',
+                    'DishAmountInt': 'numberOfIitems',
+                    'ItemSaleEventDiscountType.DiscountAmount': 'numberOfDiscountedItems',
+                    'ItemSaleEventDiscountType.ComboAmount': 'numberOfComboDiscounts',
+                    'DishDiscountSumInt.averageByGuest': 'averageRevenuePerGuest',
+                    'DishServicePrintTime.Max': 'lastServPrintTime'
+                }, inplace=True)
 
-        rawHeader_df = rawHeader_df[['uniqueOrderId', 'store', 'conception', 'accountingDay', 'receiptNo', 'tableNo', 'shiftNo', 'orderDeleted',
-                                     'delivery', 'deliveryType', 'section', 'deliverySource', 'orderType', 'externalOrderNo', 'customerPhoneNumber',
-                                    'customerFullName', 'deliveryComment', 'waiterForTheOrder', 'openingTime', 'deliveryPrintTime', 'plannedDeliveryTime',
-                                     'deliveryDispatchTime', 'actualDeliveryTime', 'deliveryClosingTime', 'guestBillTime', 'deliveryInvoicePrintTime',
-                                     'closingTime', 'deliveryCancellationReason', 'deliveryCancellationComment', 'customerPriceCategory', 'GrossSalesBD',
-                                     'discountAmount', 'surchargeAmount', 'grossSalesAD', 'VATByBillAmount', 'NetSalesAD', 'numberOfGuests', 'numberOfIitems',
-                                     'numberOfDiscountedItems', 'numberOfComboDiscounts', 'averageRevenuePerGuest', 'lastServPrintTime']]
-
-        # print(rawHeader_df[['discountAmount', 'surchargeAmount', 'grossSalesAD',
-        #       'GrossSalesBD', 'VATByBillAmount', 'NetSalesAD']].head())
-        # print(rawHeader_df[['discountAmount', 'surchargeAmount', 'grossSalesAD',
-        #       'GrossSalesBD', 'VATByBillAmount', 'NetSalesAD']].dtypes)
-        rawHeader_df.fillna("", inplace=True)
-        return rawHeader_df
+            rawHeader_df = rawHeader_df[['uniqueOrderId', 'store', 'conception', 'accountingDay', 'receiptNo', 'tableNo', 'shiftNo', 'orderDeleted',
+                                        'delivery', 'deliveryType', 'section', 'deliverySource', 'orderType', 'externalOrderNo', 'customerPhoneNumber',
+                                         'customerFullName', 'deliveryComment', 'waiterForTheOrder', 'openingTime', 'deliveryPrintTime', 'plannedDeliveryTime',
+                                         'deliveryDispatchTime', 'actualDeliveryTime', 'deliveryClosingTime', 'guestBillTime', 'deliveryInvoicePrintTime',
+                                         'closingTime', 'deliveryCancellationReason', 'deliveryCancellationComment', 'customerPriceCategory', 'GrossSalesBD',
+                                         'discountAmount', 'surchargeAmount', 'grossSalesAD', 'VATByBillAmount', 'NetSalesAD', 'numberOfGuests', 'numberOfIitems',
+                                         'numberOfDiscountedItems', 'numberOfComboDiscounts', 'averageRevenuePerGuest', 'lastServPrintTime']]
+            rawHeader_df['transformFlag'] = False
+            rawHeader_df['storeID'] = StoreId
+            rawHeader_df['fetchSales'] = False
+            rawHeader_df['fetchPayment'] = False
+            rawHeader_df.fillna("", inplace=True)
+            return rawHeader_df
+        else:
+            fetchData_df = pd.DataFrame()
+            return fetchData_df
 
     @ task(name="findDuplicate",
            description="RawHeader findDuplicate.",
            tags=["RawHeader", "findDuplicate"])
     def findDuplicate(rawHeader_df, conn):
-        extractRawHeader = pd.read_sql_query(
-            "SELECT * FROM `rawDataTest`.`rawHeader`", conn)
 
-        print(extractRawHeader.shape)
-        if not extractRawHeader.empty:
-            duplicateRecord = pd.merge(
-                rawHeader_df, extractRawHeader.uniqueOrderId, how='inner')
-            print("duplicateRecord Raw Header: ", duplicateRecord.shape)
-            rawHeader_df = rawHeader_df[~rawHeader_df.uniqueOrderId.isin(
-                list(duplicateRecord.uniqueOrderId))]
+        if not rawHeader_df.empty:
+            extractRawHeader = pd.read_sql_query(
+                "SELECT * FROM `rawDataTest`.`rawHeader` WHERE transformFlag = 0", conn)
 
-        return rawHeader_df
+            print(extractRawHeader.shape)
+            if not extractRawHeader.empty:
+                duplicateRecord = pd.merge(
+                    rawHeader_df, extractRawHeader.uniqueOrderId, how='inner')
+                print("duplicateRecord Raw Header: ", duplicateRecord.shape)
+                rawHeader_df = rawHeader_df[~rawHeader_df.uniqueOrderId.isin(
+                    list(duplicateRecord.uniqueOrderId))]
+
+            return rawHeader_df
+        else:
+            fetchData_df = pd.DataFrame()
+            return fetchData_df
 
     @ task(name="loadData",
            description="RawHeader loadData.",
@@ -469,9 +496,14 @@ class RawHeader:
                             `numberOfDiscountedItems`,
                             `numberOfComboDiscounts`,
                             `averageRevenuePerGuest`,
-                            `lastServPrintTime`)
+                            `lastServPrintTime`,
+                            `transformFlag`,
+                            `storeID`,
+                            `fetchSales`,
+                            `fetchPayment`,)
                             VALUES
-                            (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                            (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+
                 cursor.executemany(insert_query, paymentEntry_df_to_list)
                 conn.commit()
                 print("INSERTED INTO Raw Header")
@@ -495,19 +527,18 @@ def callingRawHeader(conn, storeDetails, previousDateStr, dateFromStr):
         dataId = rawHeader.RawHeader_ExportRawHeader(
             token, session.cookies.get_dict(), previousDateStr, dateFromStr)
         status = rawHeader.RawHeader_FetchStatus(token, dataId['data'])
+        print(dataId, status)
         fetchData_df = rawHeader.RawHeader_FetchData(
             token, dataId, status)
         print(fetchData_df.head())
         print(fetchData_df.shape)
-        rawHeader_df = rawHeader.RawHeader_transformData(fetchData_df)
+        rawHeader_df = rawHeader.RawHeader_transformData(
+            fetchData_df, storeDetails['StoreId'])
         rawHeader_df = rawHeader.findDuplicate(rawHeader_df, conn)
+        print("findDuplicate")
+        print(rawHeader_df)
         rawHeader.RawHeader_loadData(rawHeader_df, conn)
 
-        if not rawHeader_df.empty:
-            return list(rawHeader_df.uniqueOrderId)
-        else:
-            rawHeader_df = pd.DataFrame()
-            return rawHeader_df
     except Exception as err:
         logging.error(
             'FLOW-RawHeader - Error - ' + str(datetime.now().today()) + ' - ' + str(err))
@@ -523,7 +554,7 @@ class RawPayment(RawHeader):
     @ task(name="ExportRawPayment",
            description=" RawPayment ExportRawPayment.",
            tags=["RawPayment", "ExportRawPayment"])
-    def RawPayment_ExportRawPayment(token, selectStoreCookie, dateFrom, dateTo):
+    def RawPayment_ExportRawPayment(token, selectStoreCookie, distinctData):
         try:
             url = "https://yo-sushi-gourmet-gulf-co.iikoweb.co.uk/api/olap/init"
 
@@ -532,40 +563,58 @@ class RawPayment(RawHeader):
                 "categoryFields": [],
                 "groupFields": [
                     "UniqOrderId.Id",
+                    "Department",
+                    "Conception",
                     "OpenDate.Typed",
                     "OrderNum",
-                    "PayTypes",
                     "TableNum",
-                    "SessionNum",
-                    "PayTypes.Combo",
-                    "CardNumber",
-                    "Currencies.Currency",
-                    "NonCashPaymentType",
-                    "CreditUser",
-                    "Currencies.CurrencyRate",
-                    "AuthUser",
-                    "AuthUser.Id",
-                    "Cashier",
-                    "Cashier.Id"
+                    "DeletedWithWriteoff",
+                    "RemovalType",
+                    "DeletionComment",
+                    "DishId",
+                    "DishCode",
+                    "DishName",
+                    "DishFullName",
+                    "DishCategory.Accounting",
+                    "DishCategory",
+                    "DishGroup",
+                    "DishGroup.TopParent",
+                    "DishGroup.SecondParent",
+                    "DishGroup.ThirdParent",
+                    "Cooking.ServeNumber",
+                    "WaiterName",
+                    "DishServicePrintTime",
+                    "Comment",
+                    "SoldWithDish",
+                    "OrderDiscount.Type",
+                    "OrderIncrease.Type",
+                    "ItemSaleEventDiscountType",
+                    "Delivery.CookingFinishTime"
                 ],
                 "stackByDataFields": False,
                 "dataFields": [
+                    "DishAmountInt",
+                    "DishSumInt.averagePriceWithVAT",
+                    "DishDiscountSumInt.averagePriceWithVAT",
+                    "DishSumInt",
+                    "DiscountSum",
+                    "IncreaseSum",
                     "DishDiscountSumInt",
                     "VAT.Sum",
                     "DishDiscountSumInt.withoutVAT",
-                    "PayTypes.VoucherNum"
+                    "Cooking.CookingDuration.Avg",
+                    "Cooking.Cooking1Duration.Avg",
+                    "Cooking.Cooking2Duration.Avg",
+                    "Cooking.Cooking3Duration.Avg",
+                    "Cooking.Cooking4Duration.Avg"
                 ],
                 "calculatedFields": [
                 ],
                 "filters": [
                     {
-                        "field": "OpenDate.Typed",
-                        "filterType": "date_range",
-                        "dateFrom": dateFrom,
-                        "dateTo": dateTo,
-                        "valueMin": None,
-                        "valueMax": None,
-                        "valueList": [],
+                        "field": "UniqOrderId.Id",
+                        "filterType": "value_list",
+                        "valueList": distinctData,
                         "includeLeft": True,
                         "includeRight": False,
                         "inclusiveList": True
@@ -644,7 +693,7 @@ class RawPayment(RawHeader):
     @ task(name="loadData",
            description="RawPayment loadData.",
            tags=["RawPayment", "loadData"])
-    def RawPayment_loadData(rawPayment_df, conn):
+    def RawPayment_loadData(rawPayment_df, conn, distinctData):
         try:
             if not rawPayment_df.empty:
                 cursor = conn.cursor()
@@ -660,6 +709,12 @@ class RawPayment(RawHeader):
                 cursor.executemany(insert_query, rawPayment_df_to_list)
                 conn.commit()
                 print("INSERTED INTO Raw Payment")
+                updateQuery = f"""
+                    UPDATE `rawDataTest`.`rawHeader` SET fetchPayment = True
+                    WHERE uniqueOrderId IN {tuple(distinctData)};
+                """
+                cursor.execute(updateQuery)
+                conn.commit()
             else:
                 print("Raw Payment Empty")
         except Exception as e:
@@ -668,7 +723,7 @@ class RawPayment(RawHeader):
 
 @ flow(name="RawPayment",
        description="Running all the task which are associated with Raw Payment.",)
-def callingRawPayment(conn, storeDetails, previousDateStr, dateFromStr):
+def callingRawPayment(conn, storeDetails, distinctData):
     rawPayment = RawPayment()
     try:
         token = Authenticate()
@@ -676,13 +731,13 @@ def callingRawPayment(conn, storeDetails, previousDateStr, dateFromStr):
         session = rawPayment.RawHeader_selectStore(
             token, storeDetails['StoreId'])
         dataId = rawPayment.RawPayment_ExportRawPayment(
-            token, session.cookies.get_dict(), previousDateStr, dateFromStr)
+            token, session.cookies.get_dict(), distinctData)
         status = rawPayment.RawHeader_FetchStatus(token, dataId['data'])
         fetchData_df = rawPayment.RawHeader_FetchData(
             token, dataId, status)
         rawPayment_df = rawPayment.RawPayment_transformData(fetchData_df)
         rawPayment_df = rawPayment.findDuplicate(rawPayment_df, conn)
-        rawPayment.RawPayment_loadData(rawPayment_df, conn)
+        rawPayment.RawPayment_loadData(rawPayment_df, conn, distinctData)
     except Exception as err:
         logging.error(
             'FLOW-RawHeader - Error - ' + str(datetime.now().today()) + ' - ' + str(err))
@@ -698,7 +753,7 @@ class RawSales(RawHeader):
     @ task(name="ExportRawSales",
            description=" RawSales ExportRawSales.",
            tags=["RawSales", "ExportRawSales"])
-    def RawSales_ExportRawSales(token, selectStoreCookie, distinctData, dateFrom, dateTo):
+    def RawSales_ExportRawSales(token, selectStoreCookie, distinctData):
         try:
             url = "https://yo-sushi-gourmet-gulf-co.iikoweb.co.uk/api/olap/init"
 
@@ -755,18 +810,6 @@ class RawSales(RawHeader):
                 "calculatedFields": [
                 ],
                 "filters": [
-                    {
-                        "field": "OpenDate.Typed",
-                        "filterType": "date_range",
-                        "dateFrom": dateFrom,
-                        "dateTo": dateTo,
-                        "valueMin": None,
-                        "valueMax": None,
-                        "valueList": [],
-                        "includeLeft": True,
-                        "includeRight": False,
-                        "inclusiveList": True
-                    },
                     {
                         "field": "UniqOrderId.Id",
                         "filterType": "value_list",
@@ -863,24 +906,28 @@ class RawSales(RawHeader):
            description="RawSales findDuplicate.",
            tags=["RawSales", "findDuplicate"])
     def findDuplicate(rawSale_df, conn):
-        extractRawSales = pd.read_sql_query(
-            "SELECT * FROM `rawDataTest`.`rawSales`", conn)
+        if not rawSale_df.empty:
+            extractRawSales = pd.read_sql_query(
+                "SELECT * FROM `rawDataTest`.`rawSales`", conn)
 
-        print(extractRawSales.shape)
-        if not extractRawSales.empty:
-            duplicateRecord = pd.merge(
-                rawSale_df, extractRawSales.uniqueOrderId, how='inner')
-            print("duplicateRecord Raw Sale: ", duplicateRecord.shape)
-            rawSale_df = rawSale_df[~rawSale_df.uniqueOrderId.isin(
-                list(duplicateRecord.uniqueOrderId))]
+            print(extractRawSales.shape)
+            if not extractRawSales.empty:
+                duplicateRecord = pd.merge(
+                    rawSale_df, extractRawSales.uniqueOrderId, how='inner')
+                print("duplicateRecord Raw Sale: ", duplicateRecord.shape)
+                rawSale_df = rawSale_df[~rawSale_df.uniqueOrderId.isin(
+                    list(duplicateRecord.uniqueOrderId))]
 
-        print("Raw Sale: ", rawSale_df.shape)
-        return rawSale_df
+            print("Raw Sale: ", rawSale_df.shape)
+            return rawSale_df
+        else:
+            fetchData_df = pd.DataFrame()
+            return fetchData_df
 
     @ task(name="loadData",
            description="RawSales loadData.",
            tags=["RawSales", "loadData"])
-    def RawSales_loadData(rawSale_df, conn):
+    def RawSales_loadData(rawSale_df, conn, distinctData):
         if not rawSale_df.empty:
             cursor = conn.cursor()
             rawSale_df_to_list = list(tuple(row)
@@ -901,29 +948,38 @@ class RawSales(RawHeader):
             conn.commit()
             print("INSERTED INTO Raw Sales")
 
+            updateQuery = f"""
+                UPDATE `rawDataTest`.`rawHeader` SET fetchSales = True
+                WHERE uniqueOrderId IN {tuple(distinctData)};
+            """
+            cursor.execute(updateQuery)
+            conn.commit()
+
 
 @ flow(name="RawSales",
        description="Running all the task which are associated with Raw Payment.",)
 def callingRawSales(conn, storeDetails, distinctData, previousDateStr, dateFromStr):
     rawSale = RawSales()
-    # StoreData_df = pd.read_csv('Requirements/Data/StoreMasterv2,0.csv')
-    # StoreData_df.StoreId = StoreData_df.StoreId.astype(str)
-    # StoreData_dict = StoreData_df.to_dict(orient='records')
 
     try:
         token = Authenticate()
-
+        print("distinctData")
+        print(len(distinctData))
         session = rawSale.RawHeader_selectStore(
             token, storeDetails['StoreId'])
         dataId = rawSale.RawSales_ExportRawSales(
-            token, session.cookies.get_dict(), distinctData, previousDateStr, dateFromStr)
+            token, session.cookies.get_dict(), distinctData)
         status = rawSale.RawHeader_FetchStatus(token, dataId['data'])
-        fetchData_df = rawSale.RawHeader_FetchData(
-            token, dataId, status)
-        rawSale_df = rawSale.RawSales_transformData(fetchData_df)
-        print("rawSale_df transformData: ", rawSale_df.shape)
-        rawSale_df = rawSale.findDuplicate(rawSale_df, conn)
-        rawSale.RawSales_loadData(rawSale_df, conn)
+        if status['data'] == 'SUCCESS':
+            print(dataId, status)
+            fetchData_df = rawSale.RawHeader_FetchData(
+                token, dataId, status)
+            print("RAW SALES DATA")
+            print(fetchData_df)
+            rawSale_df = rawSale.RawSales_transformData(fetchData_df)
+            print("rawSale_df transformData: ", rawSale_df.shape)
+            rawSale_df = rawSale.findDuplicate(rawSale_df, conn)
+            rawSale.RawSales_loadData(rawSale_df, conn, distinctData)
     except Exception as err:
         logging.error(
             'FLOW-RawHeader - Error - ' + str(datetime.now().today()) + ' - ' + str(err))
@@ -936,6 +992,11 @@ def runFlows(conn):
     f = open("config.json")
     configData = json.load(f)
 
+    rawPaymentFetchData = pd.read_sql(
+        "SELECT uniqueOrderId FROM `rawDataTest`.`rawHeader` WHERE fetchPayment = 0;", conn)
+    rawSalesFetchData = pd.read_sql(
+        "SELECT uniqueOrderId FROM `rawDataTest`.`rawHeader` WHERE fetchSales = 0;", conn)
+
     StoreData_df = pd.read_csv('Requirements/Data/StoreMasterv2,0.csv')
     StoreData_df.StoreId = StoreData_df.StoreId.astype(str)
     StoreData_dict = StoreData_df.to_dict(orient='records')
@@ -944,13 +1005,16 @@ def runFlows(conn):
         dateFrom = configData['CustomDate']['DateFrom']
         dateTo = configData['CustomDate']['DateTo']
         for storeDetails in StoreData_dict:
-            distinctData = callingRawHeader(
+            callingRawHeader(
                 conn, storeDetails, dateFrom, dateTo)
-            # callingRawPayment(conn, storeDetails, dateFrom, dateTo)
-            # callingRawSales(conn, storeDetails, distinctData, dateFrom, dateTo)
-            break
+            callingRawPayment(conn, storeDetails, list(
+                rawSalesFetchData.uniqueOrderId))
+            callingRawSales(conn, storeDetails, list(
+                rawSalesFetchData.uniqueOrderId))
+
+            if configData['testing']:
+                break
     else:
-        count = 0
         data_df = pd.read_sql(
             """SELECT MAX(CAST(accountingDay as date)) AS "maxDate" FROM `rawDataTest`.`rawHeader`;""", conn)
         dateFrom = data_df.maxDate.values[0]
@@ -966,12 +1030,8 @@ def runFlows(conn):
 
             for dataValue in range(daysMax):
 
-                if count == 1:
-                    break
-                count += 1
-
                 previousDate = dateFrom + timedelta(days=1)
-                dateFrom = dateFrom + timedelta(days=10)
+                dateFrom = dateFrom + timedelta(days=configData['maxDays'])
 
                 dateFromStr = str(
                     dateFrom.strftime('%Y-%m-%dT%H:%M:%S'))
@@ -979,12 +1039,12 @@ def runFlows(conn):
                     previousDate.strftime('%Y-%m-%dT%H:%M:%S'))
 
                 for storeDetails in StoreData_dict:
-                    distinctData = callingRawHeader(
+                    callingRawHeader(
                         conn, storeDetails, previousDateStr, dateFromStr)
-                    callingRawPayment(conn, storeDetails,
-                                      previousDateStr, dateFromStr)
-                    callingRawSales(conn, storeDetails,
-                                    distinctData, previousDateStr, dateFromStr)
+                    callingRawPayment(conn, storeDetails, list(
+                        rawPaymentFetchData.uniqueOrderId))
+                    callingRawSales(conn, storeDetails, list(
+                        rawSalesFetchData.uniqueOrderId))
 
             previousDate = dateFrom + timedelta(days=1)
             dateFrom = dateFrom + timedelta(days=daysMin)
@@ -994,13 +1054,14 @@ def runFlows(conn):
                 previousDate.strftime('%Y-%m-%dT%H:%M:%S'))
 
             for storeDetails in StoreData_dict:
-                distinctData = callingRawHeader(
+                callingRawHeader(
                     conn, storeDetails, previousDateStr, dateFromStr)
-                callingRawPayment(conn, storeDetails,
-                                  previousDateStr, dateFromStr)
-                callingRawSales(conn, storeDetails, distinctData,
-                                previousDateStr, dateFromStr)
-                break
+                callingRawPayment(conn, storeDetails, list(
+                    rawPaymentFetchData.uniqueOrderId))
+                callingRawSales(conn, storeDetails, list(
+                    rawSalesFetchData.uniqueOrderId))
+                if configData['testing']:
+                    break
 
         else:
             dateFromStr = str(
@@ -1009,19 +1070,14 @@ def runFlows(conn):
                 dateTo.strftime('%Y-%m-%dT%H:%M:%S'))
 
             for storeDetails in StoreData_dict:
-                distinctData = callingRawHeader(
+                callingRawHeader(
                     conn, storeDetails, dateFromStr, dateToStr)
-                # callingRawPayment(conn, storeDetails,
-                #                   dateFromStr, dateToStr)
-                # callingRawSales(conn, storeDetails, distinctData,
-                #                 dateFromStr, dateToStr)
-                break
+                callingRawPayment(conn, storeDetails, list(
+                    rawPaymentFetchData.uniqueOrderId))
+                callingRawSales(conn, storeDetails, list(
+                    rawSalesFetchData.uniqueOrderId))
+                if configData['testing']:
+                    break
 
 
 runFlows(conn)
-
-
-# DECIMAL - grossSaleAD
-# DECIMAL - grossSaleBD
-
-# Deployment
