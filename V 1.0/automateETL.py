@@ -88,107 +88,6 @@ class RawHeader:
         try:
             url = "https://yo-sushi-gourmet-gulf-co.iikoweb.co.uk/api/olap/init"
 
-            """
-            if configData['CustomDate']['status']:
-                payload = {
-                    "olapType": "SALES",
-                    "categoryFields": [],
-                    "groupFields": [
-                                "UniqOrderId.Id",
-                                "Department",
-                                "Conception",
-                                "OpenDate.Typed",
-                                "OrderNum",
-                                "Delivery.IsDelivery",
-                                "PayTypes",
-                                "Delivery.SourceKey",
-                                "OrderType",
-                                "ExternalNumber",
-                                "CreditUser"
-                    ],
-                    "stackByDataFields": False,
-                    "dataFields": [
-                        "DishDiscountSumInt"
-                    ],
-                    "calculatedFields": [
-                    ],
-                    "filters": [
-                        {
-                            "field": "OpenDate.Typed",
-                            "filterType": "date_range",
-                            "dateFrom": configData['CustomDate']['DateFrom'],
-                            "dateTo": configData['CustomDate']['DateTo'],
-                            "valueMin": None,
-                            "valueMax": None,
-                            "valueList": [],
-                            "includeLeft": True,
-                            "includeRight": False,
-                            "inclusiveList": True
-                        },
-                        {
-                            "field": "Conception",
-                            "filterType": "value_list",
-                            "valueList": ["YoSushi"],
-                            "includeLeft": True,
-                            "includeRight": False,
-                            "inclusiveList": True
-                        }
-
-                    ],
-                    "includeVoidTransactions": False,
-                    "includeNonBusinessPaymentTypes": True
-                }
-            else:
-                payload = {
-                    "olapType": "SALES",
-                    "categoryFields": [],
-                    "groupFields": [
-                                "UniqOrderId.Id",
-                                "Department",
-                                "Conception",
-                                "OpenDate.Typed",
-                                "OrderNum",
-                                "Delivery.IsDelivery",
-                                "PayTypes",
-                                "Delivery.SourceKey",
-                                "OrderType",
-                                "ExternalNumber",
-                                "CreditUser"
-                    ],
-                    "stackByDataFields": False,
-                    "dataFields": [
-                        "DishDiscountSumInt"
-                    ],
-                    "calculatedFields": [
-                    ],
-                    "filters": [
-                        {
-                            "field": "OpenDate.Typed",
-                            "filterType": "date_range",
-                            "dateFrom": self.previous_dateTime,
-                            "dateTo": self.previous_dateTime,
-                            "valueMin": None,
-                            "valueMax": None,
-                            "valueList": [],
-                            "includeLeft": True,
-                            "includeRight": False,
-                            "inclusiveList": True
-                        },
-                        {
-                            "field": "Conception",
-                            "filterType": "value_list",
-                            "valueList": ["YoSushi"],
-                            "includeLeft": True,
-                            "includeRight": False,
-                            "inclusiveList": True
-                        }
-
-                    ],
-                    "includeVoidTransactions": False,
-                    "includeNonBusinessPaymentTypes": True
-                }
-            """
-
             payload = {
                 "olapType": "SALES",
                 "categoryFields": [],
@@ -274,10 +173,6 @@ class RawHeader:
             logging.error(
                 'olap_ExportPayment - Error - ' + str(datetime.now().today()) + ' - ' + str(err))
 
-    # @task(name="FetchStatus",
-    #       description="RawHeader FetchStatus.",
-    #       tags=["RawHeader", "FetchStatus"],
-    #       retries=3, retry_delay_seconds=60)
     def RawHeader_FetchStatus(self, token, dataId):
         global count
         try:

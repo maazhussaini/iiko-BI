@@ -12,5 +12,6 @@
     },
     "SleepTime": 60,
     "attempCounts": 4,
-    "maxDays": 10
+    "maxDays": 10,
+    "testing": true
 }
