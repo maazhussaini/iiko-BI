@@ -229,9 +229,6 @@ class TransformationRawData:
         cursor.execute(updateQuery)
         conn.commit()
 
-        # temp = pd.read_sql(updateQuery, conn)
-        # print(temp)
-
         print("Update INTO transform Header's paymentTransformed")
 
     def transformSales(self):
@@ -329,4 +326,6 @@ class TransformationRawData:
 
 
 transformationRawData = TransformationRawData()
+transformationRawData.transformHeader()
+transformationRawData.transformPayment()
 transformationRawData.transformSales()

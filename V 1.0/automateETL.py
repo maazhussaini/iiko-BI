@@ -1,4 +1,5 @@
 from ast import While
+from distutils.command.config import config
 import requests
 import json
 import pandas as pd
@@ -88,6 +89,107 @@ class RawHeader:
         try:
             url = "https://yo-sushi-gourmet-gulf-co.iikoweb.co.uk/api/olap/init"
 
+            """
+            if configData['CustomDate']['status']:
+                payload = {
+                    "olapType": "SALES",
+                    "categoryFields": [],
+                    "groupFields": [
+                                "UniqOrderId.Id",
+                                "Department",
+                                "Conception",
+                                "OpenDate.Typed",
+                                "OrderNum",
+                                "Delivery.IsDelivery",
+                                "PayTypes",
+                                "Delivery.SourceKey",
+                                "OrderType",
+                                "ExternalNumber",
+                                "CreditUser"
+                    ],
+                    "stackByDataFields": False,
+                    "dataFields": [
+                        "DishDiscountSumInt"
+                    ],
+                    "calculatedFields": [
+                    ],
+                    "filters": [
+                        {
+                            "field": "OpenDate.Typed",
+                            "filterType": "date_range",
+                            "dateFrom": configData['CustomDate']['DateFrom'],
+                            "dateTo": configData['CustomDate']['DateTo'],
+                            "valueMin": None,
+                            "valueMax": None,
+                            "valueList": [],
+                            "includeLeft": True,
+                            "includeRight": False,
+                            "inclusiveList": True
+                        },
+                        {
+                            "field": "Conception",
+                            "filterType": "value_list",
+                            "valueList": ["YoSushi"],
+                            "includeLeft": True,
+                            "includeRight": False,
+                            "inclusiveList": True
+                        }
+
+                    ],
+                    "includeVoidTransactions": False,
+                    "includeNonBusinessPaymentTypes": True
+                }
+            else:
+                payload = {
+                    "olapType": "SALES",
+                    "categoryFields": [],
+                    "groupFields": [
+                                "UniqOrderId.Id",
+                                "Department",
+                                "Conception",
+                                "OpenDate.Typed",
+                                "OrderNum",
+                                "Delivery.IsDelivery",
+                                "PayTypes",
+                                "Delivery.SourceKey",
+                                "OrderType",
+                                "ExternalNumber",
+                                "CreditUser"
+                    ],
+                    "stackByDataFields": False,
+                    "dataFields": [
+                        "DishDiscountSumInt"
+                    ],
+                    "calculatedFields": [
+                    ],
+                    "filters": [
+                        {
+                            "field": "OpenDate.Typed",
+                            "filterType": "date_range",
+                            "dateFrom": self.previous_dateTime,
+                            "dateTo": self.previous_dateTime,
+                            "valueMin": None,
+                            "valueMax": None,
+                            "valueList": [],
+                            "includeLeft": True,
+                            "includeRight": False,
+                            "inclusiveList": True
+                        },
+                        {
+                            "field": "Conception",
+                            "filterType": "value_list",
+                            "valueList": ["YoSushi"],
+                            "includeLeft": True,
+                            "includeRight": False,
+                            "inclusiveList": True
+                        }
+
+                    ],
+                    "includeVoidTransactions": False,
+                    "includeNonBusinessPaymentTypes": True
+                }
+            """
+
             payload = {
                 "olapType": "SALES",
                 "categoryFields": [],
@@ -173,6 +275,10 @@ class RawHeader:
             logging.error(
                 'olap_ExportPayment - Error - ' + str(datetime.now().today()) + ' - ' + str(err))
 
+    # @task(name="FetchStatus",
+    #       description="RawHeader FetchStatus.",
+    #       tags=["RawHeader", "FetchStatus"],
+    #       retries=3, retry_delay_seconds=60)
     def RawHeader_FetchStatus(self, token, dataId):
         global count
         try:
@@ -395,7 +501,7 @@ class RawHeader:
                             `transformFlag`,
                             `storeID`,
                             `fetchSales`,
-                            `fetchPayment`,)
+                            `fetchPayment`)
                             VALUES
                             (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
@@ -458,54 +564,44 @@ class RawPayment(RawHeader):
                 "categoryFields": [],
                 "groupFields": [
                     "UniqOrderId.Id",
-                    "Department",
-                    "Conception",
                     "OpenDate.Typed",
                     "OrderNum",
+                    "PayTypes",
                     "TableNum",
-                    "DeletedWithWriteoff",
-                    "RemovalType",
-                    "DeletionComment",
-                    "DishId",
-                    "DishCode",
-                    "DishName",
-                    "DishFullName",
-                    "DishCategory.Accounting",
-                    "DishCategory",
-                    "DishGroup",
-                    "DishGroup.TopParent",
-                    "DishGroup.SecondParent",
-                    "DishGroup.ThirdParent",
-                    "Cooking.ServeNumber",
-                    "WaiterName",
-                    "DishServicePrintTime",
-                    "Comment",
-                    "SoldWithDish",
-                    "OrderDiscount.Type",
-                    "OrderIncrease.Type",
-                    "ItemSaleEventDiscountType",
-                    "Delivery.CookingFinishTime"
+                    "SessionNum",
+                    "PayTypes.Combo",
+                    "CardNumber",
+                    "Currencies.Currency",
+                    "NonCashPaymentType",
+                    "CreditUser",
+                    "Currencies.CurrencyRate",
+                    "AuthUser",
+                    "AuthUser.Id",
+                    "Cashier",
+                    "Cashier.Id"
                 ],
                 "stackByDataFields": False,
                 "dataFields": [
-                    "DishAmountInt",
-                    "DishSumInt.averagePriceWithVAT",
-                    "DishDiscountSumInt.averagePriceWithVAT",
-                    "DishSumInt",
-                    "DiscountSum",
-                    "IncreaseSum",
                     "DishDiscountSumInt",
                     "VAT.Sum",
                     "DishDiscountSumInt.withoutVAT",
-                    "Cooking.CookingDuration.Avg",
-                    "Cooking.Cooking1Duration.Avg",
-                    "Cooking.Cooking2Duration.Avg",
-                    "Cooking.Cooking3Duration.Avg",
-                    "Cooking.Cooking4Duration.Avg"
+                    "PayTypes.VoucherNum"
                 ],
                 "calculatedFields": [
                 ],
                 "filters": [
+                    {
+                        "field": "OpenDate.Typed",
+                        "filterType": "date_range",
+                        "dateFrom": "2022-06-01T00:00:00",
+                        "dateTo": "2022-09-01T00:00:00",
+                        "valueMin": None,
+                        "valueMax": None,
+                        "valueList": [],
+                        "includeLeft": True,
+                        "includeRight": False,
+                        "inclusiveList": True
+                    },
                     {
                         "field": "UniqOrderId.Id",
                         "filterType": "value_list",
@@ -514,7 +610,6 @@ class RawPayment(RawHeader):
                         "includeRight": False,
                         "inclusiveList": True
                     }
-
                 ],
                 "includeVoidTransactions": False,
                 "includeNonBusinessPaymentTypes": True
@@ -618,8 +713,12 @@ class RawPayment(RawHeader):
 
 @ flow(name="RawPayment",
        description="Running all the task which are associated with Raw Payment.",)
-def callingRawPayment(conn, storeDetails, distinctData):
+def callingRawPayment(conn, storeDetails):
     rawPayment = RawPayment()
+    rawPaymentFetchData = pd.read_sql(
+        "SELECT uniqueOrderId FROM `rawDataTest`.`rawHeader` WHERE fetchPayment = 0;", conn)
+    distinctData = list(
+        rawPaymentFetchData.uniqueOrderId.values)
     try:
         token = Authenticate()
 
@@ -705,6 +804,18 @@ class RawSales(RawHeader):
                 "calculatedFields": [
                 ],
                 "filters": [
+                    {
+                        "field": "OpenDate.Typed",
+                        "filterType": "date_range",
+                        "dateFrom": "2022-06-01T00:00:00",
+                        "dateTo": "2022-09-01T00:00:00",
+                        "valueMin": None,
+                        "valueMax": None,
+                        "valueList": [],
+                        "includeLeft": True,
+                        "includeRight": False,
+                        "inclusiveList": True
+                    },
                     {
                         "field": "UniqOrderId.Id",
                         "filterType": "value_list",
@@ -853,9 +964,12 @@ class RawSales(RawHeader):
 
 @ flow(name="RawSales",
        description="Running all the task which are associated with Raw Payment.",)
-def callingRawSales(conn, storeDetails, distinctData, previousDateStr, dateFromStr):
+def callingRawSales(conn, storeDetails):
     rawSale = RawSales()
-
+    rawSalesFetchData = pd.read_sql(
+        "SELECT uniqueOrderId FROM `rawDataTest`.`rawHeader` WHERE fetchSales = 0;", conn)
+    distinctData = list(
+        rawSalesFetchData.uniqueOrderId.values)
     try:
         token = Authenticate()
         print("distinctData")
@@ -887,28 +1001,25 @@ def runFlows(conn):
     f = open("config.json")
     configData = json.load(f)
 
-    rawPaymentFetchData = pd.read_sql(
-        "SELECT uniqueOrderId FROM `rawDataTest`.`rawHeader` WHERE fetchPayment = 0;", conn)
-    rawSalesFetchData = pd.read_sql(
-        "SELECT uniqueOrderId FROM `rawDataTest`.`rawHeader` WHERE fetchSales = 0;", conn)
-
     StoreData_df = pd.read_csv('Requirements/Data/StoreMasterv2,0.csv')
     StoreData_df.StoreId = StoreData_df.StoreId.astype(str)
     StoreData_dict = StoreData_df.to_dict(orient='records')
 
     if configData['CustomDate']['status']:
+        storeAttempts = 0
         dateFrom = configData['CustomDate']['DateFrom']
         dateTo = configData['CustomDate']['DateTo']
         for storeDetails in StoreData_dict:
             callingRawHeader(
                 conn, storeDetails, dateFrom, dateTo)
-            callingRawPayment(conn, storeDetails, list(
-                rawSalesFetchData.uniqueOrderId))
-            callingRawSales(conn, storeDetails, list(
-                rawSalesFetchData.uniqueOrderId))
+            callingRawPayment(conn, storeDetails)
+            callingRawSales(conn, storeDetails)
 
+            storeAttempts += 1
             if configData['testing']:
-                break
+                if storeAttempts >= configData['maxStoreTest']:
+                    break
+
     else:
         data_df = pd.read_sql(
             """SELECT MAX(CAST(accountingDay as date)) AS "maxDate" FROM `rawDataTest`.`rawHeader`;""", conn)
@@ -936,10 +1047,8 @@ def runFlows(conn):
                 for storeDetails in StoreData_dict:
                     callingRawHeader(
                         conn, storeDetails, previousDateStr, dateFromStr)
-                    callingRawPayment(conn, storeDetails, list(
-                        rawPaymentFetchData.uniqueOrderId))
-                    callingRawSales(conn, storeDetails, list(
-                        rawSalesFetchData.uniqueOrderId))
+                    callingRawPayment(conn, storeDetails)
+                    callingRawSales(conn, storeDetails)
 
             previousDate = dateFrom + timedelta(days=1)
             dateFrom = dateFrom + timedelta(days=daysMin)
@@ -951,10 +1060,8 @@ def runFlows(conn):
             for storeDetails in StoreData_dict:
                 callingRawHeader(
                     conn, storeDetails, previousDateStr, dateFromStr)
-                callingRawPayment(conn, storeDetails, list(
-                    rawPaymentFetchData.uniqueOrderId))
-                callingRawSales(conn, storeDetails, list(
-                    rawSalesFetchData.uniqueOrderId))
+                callingRawPayment(conn, storeDetails)
+                callingRawSales(conn, storeDetails)
                 if configData['testing']:
                     break
 
@@ -967,12 +1074,13 @@ def runFlows(conn):
             for storeDetails in StoreData_dict:
                 callingRawHeader(
                     conn, storeDetails, dateFromStr, dateToStr)
-                callingRawPayment(conn, storeDetails, list(
-                    rawPaymentFetchData.uniqueOrderId))
-                callingRawSales(conn, storeDetails, list(
-                    rawSalesFetchData.uniqueOrderId))
+                callingRawPayment(conn, storeDetails)
+                callingRawSales(conn, storeDetails)
                 if configData['testing']:
                     break
 
 
 runFlows(conn)
+
+
+# ADD STOREID in rawPayment and rawSales
