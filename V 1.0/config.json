@@ -1,5 +1,7 @@
 {
     "SourceFolder": "Requirements/Data/",
+    "SourceFolder2": "Requirements/New Data/",
+    "StoreMaster": "StoreMasterv3.0.csv",
     "DumpFolder": {
         "main": "FetchData/",
         "csv": "csvData/",
@@ -7,11 +9,18 @@
     },
     "CustomDate": {
         "status": true,
-        "DateFrom": "2022-09-01T00:00:00",
-        "DateTo": "2022-09-14T00:00:00"
+        "DateFrom": "2022-04-21T00:00:00",
+        "DateTo": "2022-04-30T00:00:00"
     },
-    "SleepTime": 60,
+    "SleepTime": 30,
     "attempCounts": 4,
-    "maxDays": 10,
-    "testing": true
+    "maxDays": 5,
+    "testing": false,
+    "maxStoreTest": 2,
+    "dbConnection": {
+        "host": "rawiikodata.cpi0e90jeqda.us-east-2.rds.amazonaws.com",
+        "user": "admin",
+        "password": "MySql12$34#",
+        "dbName": "rawDataTestV2"
+    }
 }

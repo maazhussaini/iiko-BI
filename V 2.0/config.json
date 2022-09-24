@@ -13,5 +13,12 @@
     },
     "SleepTime": 60,
     "attempCounts": 4,
-    "maxDays": 5
+    "maxDays": 5,
+    "dbConnection": {
+        "host": "rawiikodata.cpi0e90jeqda.us-east-2.rds.amazonaws.com",
+        "user": "admin",
+        "password": "MySql12$34#",
+        "dbName": "rawDataTestV2"
+    },
+    "LIMIT_SQL": 100
 }
