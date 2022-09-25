@@ -9,8 +9,8 @@
     },
     "CustomDate": {
         "status": true,
-        "DateFrom": "2022-04-21T00:00:00",
-        "DateTo": "2022-04-30T00:00:00"
+        "DateFrom": "2022-08-01T00:00:00",
+        "DateTo": "2022-08-01T00:00:00"
     },
     "SleepTime": 30,
     "attempCounts": 4,

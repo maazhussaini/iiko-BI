@@ -1,5 +1,6 @@
 from ast import While
 from distutils.command.config import config
+from lib2to3.pgen2 import token
 import requests
 import json
 import pandas as pd
@@ -24,8 +25,6 @@ logging.basicConfig(filename="Logs/log-"+current_date_time_str+".txt")
 RawHeader
 """
 
-count = 0
-
 f = open("config.json")
 configData = json.load(f)
 
@@ -35,20 +34,53 @@ conn = sql.connect(host=configData['dbConnection']['host'],
                    database=configData['dbConnection']['dbName'])
 
 
+token = None
+
+
 @task(name="Authenticate",
       description="Authenticate Api.",
       tags=["GENERAL", "Authenticate"])
 def Authenticate():
-    main_url = "https://yo-sushi-gourmet-gulf-co.iikoweb.co.uk"
-    url = main_url+"/api/auth/login"
-    payload = "{\n    \"login\": \"navision\",\n    \"password\": \"75KuJSiyXWrzJU1i\"\n}"
-    headers = {}
-    s = requests.Session()
-    response = requests.request("POST", url, headers=headers, data=payload)
 
-    response = json.loads(response.text)
-    if response['error'] == False:
-        return response['token']
+    global token
+    if token is not None:
+        main_url = "https://yo-sushi-gourmet-gulf-co.iikoweb.co.uk"
+        url = main_url+"/api/stores/list"
+        payload = {}
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer '+str(token)
+        }
+        response = requests.request(
+            "POST", url, headers=headers, data=payload)
+
+        response = json.loads(response.text)
+        if response['error'] == True:
+            main_url = "https://yo-sushi-gourmet-gulf-co.iikoweb.co.uk"
+            url = main_url+"/api/auth/login"
+            payload = "{\n    \"login\": \"navision\",\n    \"password\": \"75KuJSiyXWrzJU1i\"\n}"
+            headers = {}
+            s = requests.Session()
+            response = requests.request(
+                "POST", url, headers=headers, data=payload)
+
+            response = json.loads(response.text)
+            if response['error'] == False:
+                return response['token']
+        else:
+            return token
+    else:
+        main_url = "https://yo-sushi-gourmet-gulf-co.iikoweb.co.uk"
+        url = main_url+"/api/auth/login"
+        payload = "{\n    \"login\": \"navision\",\n    \"password\": \"75KuJSiyXWrzJU1i\"\n}"
+        headers = {}
+        s = requests.Session()
+        response = requests.request(
+            "POST", url, headers=headers, data=payload)
+
+        response = json.loads(response.text)
+        if response['error'] == False:
+            return response['token']
 
 
 """
@@ -174,10 +206,6 @@ class RawHeader:
             logging.error(
                 'olap_ExportPayment - Error - ' + str(datetime.now().today()) + ' - ' + str(err))
 
-    # @task(name="FetchStatus",
-    #       description="RawHeader FetchStatus.",
-    #       tags=["RawHeader", "FetchStatus"],
-    #       retries=3, retry_delay_seconds=60)
     def RawHeader_FetchStatus(self, token, dataId):
         global count
         try:
@@ -314,20 +342,21 @@ class RawHeader:
                     "Cooking.GuestWaitTime.Avg": "AverageWaitingTimeToBeServed",
                     "Cooking.FeedLateTime.Avg": "AverageServingDelay"
                 }, inplace=True)
-
+            rawHeader_df['transformFlag'] = False
+            rawHeader_df['storeID'] = StoreId
+            rawHeader_df['fetchSales'] = False
+            rawHeader_df['fetchPayment'] = False
             rawHeader_df = rawHeader_df[['uniqueOrderId', 'store', 'conception', 'accountingDay', 'receiptNo', 'tableNo', 'shiftNo', 'orderDeleted',
                                         'delivery', 'deliveryType', 'section', 'deliverySource', 'orderType', 'externalOrderNo', 'customerPhoneNumber',
                                          'customerFullName', 'deliveryComment', 'waiterForTheOrder', 'openingTime', 'deliveryPrintTime', 'plannedDeliveryTime',
                                          'deliveryDispatchTime', 'actualDeliveryTime', 'deliveryClosingTime', 'guestBillTime', 'deliveryInvoicePrintTime',
                                          'closingTime', 'deliveryCancellationReason', 'deliveryCancellationComment', 'customerPriceCategory', 'GrossSalesBD',
                                          'discountAmount', 'surchargeAmount', 'grossSalesAD', 'VATByBillAmount', 'NetSalesAD', 'numberOfGuests', 'numberOfIitems',
-                                         'numberOfDiscountedItems', 'numberOfComboDiscounts', 'averageRevenuePerGuest', 'lastServPrintTime', "AvgCookingTime",
+                                         'numberOfDiscountedItems', 'numberOfComboDiscounts', 'averageRevenuePerGuest', 'lastServPrintTime',
+                                         'transformFlag', 'storeID', 'fetchSales', 'fetchPayment', "AvgCookingTime",
                                          "AvgCookingTime1", "AvgCookingTime2", "AvgCookingTime3", "AvgCookingTime4",
                                          "AverageCookingDelay", "AverageServingTime", "AverageWaitingTimeToBeServed", "AverageServingDelay"]]
-            rawHeader_df['transformFlag'] = False
-            rawHeader_df['storeID'] = StoreId
-            rawHeader_df['fetchSales'] = False
-            rawHeader_df['fetchPayment'] = False
+
             rawHeader_df.fillna("", inplace=True)
             return rawHeader_df
         else:
@@ -337,11 +366,11 @@ class RawHeader:
     @ task(name="findDuplicate",
            description="RawHeader findDuplicate.",
            tags=["RawHeader", "findDuplicate"])
-    def findDuplicate(rawHeader_df, conn):
+    def findDuplicate(rawHeader_df, conn, StoreId):
 
         if not rawHeader_df.empty:
             extractRawHeader = pd.read_sql_query(
-                "SELECT * FROM `rawDataTestV2`.`rawHeader` WHERE transformFlag = 0", conn)
+                f"SELECT * FROM `rawHeader` WHERE storeId = {StoreId} and  transformFlag = 0", conn)
 
             print(extractRawHeader.shape)
             if not extractRawHeader.empty:
@@ -365,7 +394,7 @@ class RawHeader:
                 cursor = conn.cursor()
                 paymentEntry_df_to_list = list(tuple(row)
                                                for row in rawHeader_df.values)
-                insert_query = """INSERT INTO `rawDataTestV2`.`rawHeader`
+                insert_query = """INSERT INTO `rawHeader`
                             (`uniqueOrderId`,
                             `store`,
                             `conception`,
@@ -450,12 +479,13 @@ def callingRawHeader(token, conn, storeDetails, previousDateStr, dateFromStr):
 
         fetchData_df = rawHeader.RawHeader_FetchData(
             token, dataId, status)
-        print(fetchData_df.head())
-        print(fetchData_df.shape)
+        print(fetchData_df.head(), storeDetails['StoreId'])
+        print(fetchData_df.shape, storeDetails['StoreId'])
         rawHeader_df = rawHeader.RawHeader_transformData(
             fetchData_df, storeDetails['StoreId'])
-        rawHeader_df = rawHeader.findDuplicate(rawHeader_df, conn)
-        print("findDuplicate")
+        rawHeader_df = rawHeader.findDuplicate(
+            rawHeader_df, conn, storeDetails['StoreId'])
+        print("findDuplicate: ", storeDetails['StoreId'])
         print(rawHeader_df)
         rawHeader.RawHeader_loadData(rawHeader_df, conn)
 
@@ -591,7 +621,7 @@ class RawPayment(RawHeader):
            tags=["RawPayment", "findDuplicate"])
     def findDuplicate(rawPayment_df, conn):
         extractRawPayment = pd.read_sql_query(
-            "SELECT * FROM `rawDataTestV2`.`rawPayment`", conn)
+            f"SELECT * FROM `rawPayment` WHERE uid in {tuple(rawPayment_df.uid)}", conn)
 
         print(extractRawPayment.shape)
         if not extractRawPayment.empty:
@@ -613,7 +643,7 @@ class RawPayment(RawHeader):
                 cursor = conn.cursor()
                 rawPayment_df_to_list = list(tuple(row)
                                              for row in rawPayment_df.values)
-                insert_query = """INSERT INTO `rawDataTestV2`.`rawPayment`
+                insert_query = """INSERT INTO `rawPayment`
                                 (`uid`, `uniqueOrderId`,`paymentType`,`accountingDay`,`receiptNo`,`paymentTypeSplit`,
                                 `paymentCardNo`,`paymentCurrency`,`nonCashPaymentType`,`creditedTo`,
                                 `paymentExchangeRateAED`,`authorisedBy`,`authorisedByID`,`cashier`,`cashierID`,
@@ -624,7 +654,7 @@ class RawPayment(RawHeader):
                 conn.commit()
                 print("INSERTED INTO Raw Payment")
                 updateQuery = f"""
-                    UPDATE `rawDataTestV2`.`rawHeader` SET fetchPayment = True
+                    UPDATE `rawHeader` SET fetchPayment = True
                     WHERE uniqueOrderId IN {tuple(distinctData)};
                 """
                 cursor.execute(updateQuery)
@@ -640,12 +670,12 @@ class RawPayment(RawHeader):
 def callingRawPayment(token, conn, storeDetails):
     rawPayment = RawPayment()
     rawPaymentFetchData = pd.read_sql(
-        "SELECT uniqueOrderId FROM `rawDataTestV2`.`rawHeader` WHERE fetchPayment = 0;", conn)
+        "SELECT uniqueOrderId FROM `rawHeader` WHERE fetchPayment = 0;", conn)
 
     if not rawPaymentFetchData.empty:
         data_df = pd.read_sql(
             """SELECT max(cast(accountingDay as date)) as maxDate, min(cast(accountingDay as date)) as minDate 
-                FROM `rawDataTestV2`.`rawHeader` WHERE fetchPayment = 0;""", conn)
+                FROM `rawHeader` WHERE fetchPayment = 0;""", conn)
         dateFrom = data_df.minDate.values[0]
         dateTo = data_df.maxDate.values[0]
         dateFromStr = str(
@@ -861,7 +891,7 @@ class RawSales(RawHeader):
     def findDuplicate(rawSale_df, conn):
         if not rawSale_df.empty:
             extractRawSales = pd.read_sql_query(
-                "SELECT * FROM `rawDataTestV2`.`rawSales`", conn)
+                f"SELECT * FROM `rawSales` WHERE uniqueOrderId in {tuple(rawSale_df.uniqueOrderId)}", conn)
 
             print(extractRawSales.shape)
             if not extractRawSales.empty:
@@ -885,7 +915,7 @@ class RawSales(RawHeader):
             cursor = conn.cursor()
             rawSale_df_to_list = list(tuple(row)
                                       for row in rawSale_df.values)
-            insert_query = """INSERT INTO `rawDataTestV2`.`rawSales`
+            insert_query = """INSERT INTO `rawSales`
                 (`uniqueOrderId`, `store`, `concept`, `accountingDay`, `receiptNo`, `tableNo`, `itemDeleted`,
                 `itemDeletionReason`, `itemDeletionComment`, `itemCode`, `itemId`, `item`, `itemFullName`,
                 `itemAccountingCategory`, `itemCategory`, `itemGroup`, `level1_itemGroup`, `level2_itemGroup`,
@@ -903,7 +933,7 @@ class RawSales(RawHeader):
             print("INSERTED INTO Raw Sales")
 
             updateQuery = f"""
-                UPDATE `rawDataTestV2`.`rawHeader` SET fetchSales = True
+                UPDATE `rawHeader` SET fetchSales = True
                 WHERE uniqueOrderId IN {tuple(distinctData)};
             """
             cursor.execute(updateQuery)
@@ -915,12 +945,12 @@ class RawSales(RawHeader):
 def callingRawSales(token, conn, storeDetails):
     rawSale = RawSales()
     rawSalesFetchData = pd.read_sql(
-        "SELECT uniqueOrderId FROM `rawDataTestV2`.`rawHeader` WHERE fetchSales = 0;", conn)
+        "SELECT uniqueOrderId FROM `rawHeader` WHERE fetchSales = 0;", conn)
 
     if not rawSalesFetchData.empty:
         data_df = pd.read_sql(
             """SELECT max(cast(accountingDay as date)) as maxDate, min(cast(accountingDay as date)) as minDate 
-                FROM `rawDataTestV2`.`rawHeader` WHERE fetchSales = 0;""", conn)
+                FROM `rawHeader` WHERE fetchSales = 0;""", conn)
         dateFrom = data_df.minDate.values[0]
         dateTo = data_df.maxDate.values[0]
         dateFromStr = str(
@@ -946,8 +976,6 @@ def callingRawSales(token, conn, storeDetails):
                     token, dataId, status)
                 print("RAW SALES DATA")
                 print(fetchData_df)
-                logging.info('FLOW-RawSale - DETAIL - ' + str(storeDetails['StoreId']) + ' - ' + str(
-                    dataId) + ' - ' + str(status) + '-' + str(fetchData_df.shape))
                 rawSale_df = rawSale.RawSales_transformData(fetchData_df)
                 print("rawSale_df transformData: ", rawSale_df.shape)
                 rawSale_df = rawSale.findDuplicate(rawSale_df, conn)
@@ -990,45 +1018,45 @@ def runFlows(conn):
                     break
 
     else:
-        data_df = pd.read_sql(
-            """SELECT MAX(CAST(accountingDay as date)) AS "maxDate" FROM `rawDataTestV2`.`rawHeader`;""", conn)
-        dateFrom = data_df.maxDate.values[0]
-        dateTo = date.today()
+        for storeDetails in StoreData_dict:
+            token = Authenticate()
+            data_df = pd.read_sql(
+                f"""SELECT MAX(CAST(accountingDay as date)) AS "maxDate" FROM `rawHeader` WHERE storeID = {storeDetails['StoreId']};""", conn)
+            dateFrom = data_df.maxDate.values[0]
+            dateTo = date.today()
 
-        diffDate = dateTo - dateFrom
-        diffDay = int(str(diffDate).split(',')[0].split(' ')[0])
+            diffDate = dateTo - dateFrom
+            diffDay = int(str(diffDate).split(',')[0].split(' ')[0])
 
-        if diffDay > configData['maxDays']:
+            if diffDay > configData['maxDays']:
 
-            daysMax = int(diffDay / configData['maxDays'])
-            daysMin = int(diffDay % configData['maxDays'])
+                daysMax = int(diffDay / configData['maxDays'])
+                daysMin = int(diffDay % configData['maxDays'])
 
-            for dataValue in range(daysMax):
+                for dataValue in range(daysMax):
 
-                previousDate = dateFrom + timedelta(days=1)
-                dateFrom = dateFrom + timedelta(days=configData['maxDays'])
+                    previousDate = dateFrom + timedelta(days=1)
+                    dateFrom = dateFrom + timedelta(days=configData['maxDays'])
 
-                dateFromStr = str(
-                    dateFrom.strftime('%Y-%m-%dT%H:%M:%S'))
-                previousDateStr = str(
-                    previousDate.strftime('%Y-%m-%dT%H:%M:%S'))
+                    dateFromStr = str(
+                        dateFrom.strftime('%Y-%m-%dT%H:%M:%S'))
+                    previousDateStr = str(
+                        previousDate.strftime('%Y-%m-%dT%H:%M:%S'))
 
-                for storeDetails in StoreData_dict:
-                    token = Authenticate()
                     callingRawHeader(token,
                                      conn, storeDetails, previousDateStr, dateFromStr)
                     callingRawPayment(token, conn, storeDetails)
                     callingRawSales(token, conn, storeDetails)
 
-            previousDate = dateFrom + timedelta(days=1)
-            dateFrom = dateFrom + timedelta(days=daysMin)
-            dateFromStr = str(
-                dateFrom.strftime('%Y-%m-%dT%H:%M:%S'))
-            previousDateStr = str(
-                previousDate.strftime('%Y-%m-%dT%H:%M:%S'))
+                previousDate = dateFrom + timedelta(days=1)
+                dateFrom = dateFrom + timedelta(days=daysMin)
+                dateFromStr = str(
+                    dateFrom.strftime('%Y-%m-%dT%H:%M:%S'))
+                previousDateStr = str(
+                    previousDate.strftime('%Y-%m-%dT%H:%M:%S'))
 
-            for storeDetails in StoreData_dict:
-                token = Authenticate()
+                # for storeDetails in StoreData_dict:
+                #     token = Authenticate()
                 callingRawHeader(token,
                                  conn, storeDetails, previousDateStr, dateFromStr)
                 callingRawPayment(token, conn, storeDetails)
@@ -1036,17 +1064,17 @@ def runFlows(conn):
                 if configData['testing']:
                     break
 
-        else:
-            dateFromStr = str(
-                dateFrom.strftime('%Y-%m-%dT%H:%M:%S'))
-            dateToStr = str(
-                dateTo.strftime('%Y-%m-%dT%H:%M:%S'))
+            else:
+                dateFromStr = str(
+                    dateFrom.strftime('%Y-%m-%dT%H:%M:%S'))
+                dateToStr = str(
+                    dateTo.strftime('%Y-%m-%dT%H:%M:%S'))
 
-            for storeDetails in StoreData_dict:
-                callingRawHeader(
-                    conn, storeDetails, dateFromStr, dateToStr)
-                callingRawPayment(conn, storeDetails)
-                callingRawSales(conn, storeDetails)
+                # for storeDetails in StoreData_dict:
+                callingRawHeader(token,
+                                 conn, storeDetails, dateFromStr, dateToStr)
+                callingRawPayment(token, conn, storeDetails)
+                callingRawSales(token, conn, storeDetails)
                 if configData['testing']:
                     break
 
